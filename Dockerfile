@@ -1,16 +1,16 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm-bullseye
 
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     zip \
     unzip \
     curl \
     libxml2-dev \
-    oniguruma-dev \
+    libonig-dev \
     libpng-dev \
-    libzip \
+    libzip4 \
     libzip-dev \
-    openldap-dev \
+    libldap2-dev \
     supervisor \
     && docker-php-ext-configure zip \
     && docker-php-ext-install \
@@ -23,7 +23,14 @@ RUN apk add --no-cache \
         gd \
         bcmath \
         exif \
-    && rm -rf /var/cache/apk/*
+    && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
+        libxml2-dev \
+        libonig-dev \
+        libpng-dev \
+        libzip-dev \
+        libldap2-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
